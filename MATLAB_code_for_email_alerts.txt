@@ -1,0 +1,45 @@
+% Store the channel ID.
+channelID = 1513842;
+
+% Provide the ThingSpeak alerts API key.  All alerts API keys start with TAK.
+alertApiKey = 'TAK40YN5Z0W5MQ8J0APJC';
+
+% Set the address for the HTTTP call
+alertUrl="https://api.thingspeak.com/alerts/send";
+
+% webwrite uses weboptions to add required headers.  Alerts needs a ThingSpeak-Alerts-API-Key header.
+try
+    options = weboptions("HeaderFields", ["ThingSpeak-Alerts-API-Key", alertApiKey ]);
+
+    % Set the email subject.
+    alertSubject = sprintf("Reg.Water Consumption");
+    
+    % Read API Key for channel
+    readKey = "7VM7ONFQOJPI86GD";
+    
+    % Read the recent data.
+    tapVolume = thingSpeakRead(channelID,'NumMinutes',5,'Fields',2,'ReadKey',readKey);
+catch someException
+    fprintf("Didnt read values from datatstreams");
+end
+benchMark = 3;
+% Getting Last Value from datastream.
+tapVolumeAmount = 0;
+overflowVolumeAmount = 0;
+tankVolumeUsedTotal = 0;
+if length(tapVolume)>0
+    tapVolumeAmount = tapVolume(length(tapVolume));
+end
+excessAmount = 0;
+% Code to check and update leakage/excess consumption
+if (tapVolumeAmount > benchMark) %code to check user wastage
+    excessAmount = tapVolumeAmount-benchMark;
+end
+alertBody = strcat("Excess water consumption = ",string(excessAmount)," litres. ");
+ % Catch errors so the MATLAB code does not disable a TimeControl if it fails
+try
+    webwrite(alertUrl , "body", alertBody, "subject", alertSubject, options);
+    disp("Written to server")
+catch someException
+    fprintf("Failed to send alert: %s\n", someException.message);
+end
