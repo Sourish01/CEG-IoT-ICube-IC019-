@@ -3,8 +3,8 @@
 #define PI 3.1415926535897932384626433832795
 
 
-const char ssid[20] = "VENKATAKSH";   
-const char pass[20] = "09May2016";
+const char ssid[20] = "ssid";   
+const char pass[20] = "password";
 
 const char server[30] = "api.thingspeak.com";
 String writeAPIKey = "SYYOUXDGPRHQKNPZ";
